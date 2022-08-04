@@ -26,12 +26,10 @@ public class App implements KeyListener {
 
     public static double eval(final String str) {
         return new Object() {
-            String formatStr = str;
-
             int pos = -1, ch;
 
             void nextChar() {
-                ch = (++pos < formatStr.length()) ? formatStr.charAt(pos) : -1;
+                ch = (++pos < str.length()) ? str.charAt(pos) : -1;
             }
 
             boolean eat(int charToEat) {
@@ -47,7 +45,7 @@ public class App implements KeyListener {
             double parse() {
                 nextChar();
                 double x = parseExpression();
-                if (pos < formatStr.length())
+                if (pos < str.length())
                     throw new RuntimeException("Unexpected: " + (char) ch);
                 return x;
             }
@@ -98,11 +96,11 @@ public class App implements KeyListener {
                 } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
                     while ((ch >= '0' && ch <= '9') || ch == '.')
                         nextChar();
-                    x = Double.parseDouble(formatStr.substring(startPos, this.pos));
+                    x = Double.parseDouble(str.substring(startPos, this.pos));
                 } else if (ch >= 'a' && ch <= 'z') { // functions
                     while (ch >= 'a' && ch <= 'z')
                         nextChar();
-                    String func = formatStr.substring(startPos, this.pos);
+                    String func = str.substring(startPos, this.pos);
                     System.out.println(func);
                     if (eat('(')) {
                         x = parseExpression();
