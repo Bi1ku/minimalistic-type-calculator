@@ -16,9 +16,9 @@ public class App implements KeyListener {
     public static char prevKey = ' ';
     public static HashMap<String, String> symObj = new HashMap<String, String>();
 
-    public static void initSyms() {
+    public static void initSymsAndMultiParamFuncs() {
         symObj.put("pi", String.valueOf(Math.PI));
-        // More symbols
+        symObj.put("dist(", String.valueOf("sqrt((var1 - var3)^2 + (var2 - var4)^2)"));
     }
 
     public static void correctPointError(double num) {
@@ -101,7 +101,6 @@ public class App implements KeyListener {
                     while (ch >= 'a' && ch <= 'z')
                         nextChar();
                     String func = str.substring(startPos, this.pos);
-                    System.out.println(func);
                     if (eat('(')) {
                         x = parseExpression();
                         if (!eat(')'))
@@ -109,24 +108,33 @@ public class App implements KeyListener {
                     } else {
                         x = parseFactor();
                     }
-                    if (func.equals("sqrt"))
-                        x = Math.sqrt(x);
-                    else if (func.equals("sin"))
-                        x = Math.sin(Math.toRadians(x));
-                    else if (func.equals("cos"))
-                        x = Math.cos(Math.toRadians(x));
-                    else if (func.equals("tan"))
-                        x = Math.tan(Math.toRadians(x));
-                    else if (func.equals("asin"))
-                        x = Math.toDegrees(Math.asin(x));
-                    else if (func.equals("acos"))
-                        x = Math.toDegrees(Math.acos(x));
-                    else if (func.equals("atan"))
-                        x = Math.toDegrees(Math.atan(x));
-                    else if (func.equals("log"))
-                        x = Math.log(x);
-                    else
-                        throw new RuntimeException("Unknown function: " + func);
+                    switch (func) {
+                        case "sqrt":
+                            x = Math.sqrt(x);
+                            break;
+                        case "sin":
+                            x = Math.sin(x);
+                            break;
+                        case "cos":
+                            x = Math.cos(x);
+                            break;
+                        case "tan":
+                            x = Math.tan(x);
+                            break;
+                        case "asin":
+                            x = Math.atan(x);
+                        case "atan":
+                            x = Math.atan(x);
+                            break;
+                        case "acos":
+                            x = Math.acos(x);
+                            break;
+                        case "log":
+                            x = Math.log(x);
+                            break;
+                        default:
+                            throw new RuntimeException("Unknown function: " + func);
+                    }
                 } else {
                     throw new RuntimeException("Unexpected: " + (char) ch);
                 }
@@ -140,7 +148,34 @@ public class App implements KeyListener {
     }
 
     public static String replaceSym() {
-        return textField.getText().replaceAll("pi", String.valueOf(Math.PI));
+        Object[] symArr = symObj.keySet().toArray();
+        for (int i = 0; i < symArr.length; i++) {
+            if (textField.getText().contains(String.valueOf(symArr[i]))
+                    && String.valueOf(symArr[i]).contains("(")) {
+                int startingIdx = textField.getText().indexOf(String.valueOf(symArr[i]))
+                        + String.valueOf(symArr[i]).length();
+                for (int x = startingIdx; x < textField.getText().length(); x++) {
+                    if (textField.getText().charAt(x) == ')') {
+                        String temp = textField.getText().substring(startingIdx, x);
+                        String[] tempArr = temp.split(",");
+                        String updatedStr = String.valueOf(symObj.get(String.valueOf(symArr[i])));
+                        for (byte j = 0; j < tempArr.length; j++)
+                            updatedStr = updatedStr.replace("var" + (j + 1), tempArr[j]);
+                        if (updatedStr.contains("var"))
+                            throw new RuntimeException("Wrong number of arguments");
+                        textField.setText(textField.getText().replace(textField.getText().substring(
+                                textField.getText().indexOf(String.valueOf(symArr[i])), x + 1), updatedStr));
+                        break;
+                    }
+                }
+            }
+            if (textField.getText().contains((String) symArr[i])) {
+                textField.setText(textField.getText().replaceAll((String) symArr[i], symObj.get(symArr[i])));
+            }
+        }
+        System.out.println(textField.getText());
+        return textField.getText();
+
     }
 
     public void keyPressed(KeyEvent e) {
@@ -167,7 +202,7 @@ public class App implements KeyListener {
     }
 
     public void initialize() {
-        initSyms();
+        initSymsAndMultiParamFuncs();
         textField.setFont(new Font("Monospaced", 0, 20));
         textField.addKeyListener(this);
 
