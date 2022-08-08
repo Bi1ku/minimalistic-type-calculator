@@ -16,7 +16,7 @@ public class App implements KeyListener {
     public static char prevKey = ' ';
     public static HashMap<String, String> symObj = new HashMap<String, String>();
 
-    public static void initSymsAndMultiParamFuncs() {
+    public static void initCustoms() {
         symObj.put("pi", String.valueOf(Math.PI));
         symObj.put("dist(", String.valueOf("sqrt((var1 - var3)^2 + (var2 - var4)^2)"));
     }
@@ -147,42 +147,44 @@ public class App implements KeyListener {
         }.parse();
     }
 
-    public static String replaceSym() {
-        Object[] symArr = symObj.keySet().toArray();
+    public static void recursivelyParseCustoms(Object[] symArr) {
         for (int i = 0; i < symArr.length; i++) {
-            if (textField.getText().contains(String.valueOf(symArr[i]))
-                    && String.valueOf(symArr[i]).contains("(")) {
-                int startingIdx = textField.getText().indexOf(String.valueOf(symArr[i]))
-                        + String.valueOf(symArr[i]).length();
-                for (int x = startingIdx; x < textField.getText().length(); x++) {
-                    if (textField.getText().charAt(x) == ')') {
-                        String temp = textField.getText().substring(startingIdx, x);
-                        String[] tempArr = temp.split(",");
-                        String updatedStr = String.valueOf(symObj.get(String.valueOf(symArr[i])));
-                        for (byte j = 0; j < tempArr.length; j++)
-                            updatedStr = updatedStr.replace("var" + (j + 1), tempArr[j]);
-                        if (updatedStr.contains("var"))
-                            throw new RuntimeException("Wrong number of arguments");
-                        textField.setText(textField.getText().replace(textField.getText().substring(
-                                textField.getText().indexOf(String.valueOf(symArr[i])), x + 1), updatedStr));
-                        break;
+            if (textField.getText().contains(String.valueOf(symArr[i]))) {
+                // Function Logics
+                if (String.valueOf(symArr[i]).contains("(")) {
+                    int startingIdx = textField.getText().indexOf(String.valueOf(symArr[i]))
+                            + String.valueOf(symArr[i]).length();
+                    for (int x = startingIdx; x < textField.getText().length(); x++) {
+                        if (textField.getText().charAt(x) == ')') {
+                            String args = textField.getText().substring(startingIdx, x);
+                            String[] tempArr = args.split(",");
+                            String updatedStr = String.valueOf(symObj.get(String.valueOf(symArr[i])));
+                            for (byte j = 0; j < tempArr.length; j++)
+                                updatedStr = updatedStr.replace("var" + (j + 1), tempArr[j]);
+                            if (updatedStr.contains("var"))
+                                throw new RuntimeException("Wrong number of arguments");
+                            textField.setText(textField.getText().replace(textField.getText().substring(
+                                    textField.getText().indexOf(String.valueOf(symArr[i])), x + 1), updatedStr));
+                            break;
+                        }
                     }
-                }
-            }
-            if (textField.getText().contains((String) symArr[i])) {
-                textField.setText(textField.getText().replaceAll((String) symArr[i], symObj.get(symArr[i])));
-            }
+                    // Symbol Logics
+                } else
+                    textField.setText(textField.getText().replaceAll((String) symArr[i], symObj.get(symArr[i])));
+                // Recursion to find same customs (e.g dist(1, 2, 3, 4) + dist(1,2, 5, 6))
+                recursivelyParseCustoms(symArr);
+            } else
+                break;
         }
-        System.out.println(textField.getText());
-        return textField.getText();
-
     }
 
     public void keyPressed(KeyEvent e) {
         if (KeyEvent.getKeyText(e.getKeyCode()).equals("⏎")) {
             prevEquation = textField.getText();
             try {
-                textField.setText(String.valueOf(eval(replaceSym())));
+                Object[] symArr = symObj.keySet().toArray();
+                recursivelyParseCustoms(symArr);
+                textField.setText(String.valueOf(eval(textField.getText())));
             } catch (Exception ex) {
                 textField.setText("Error: " + ex);
             }
@@ -202,7 +204,7 @@ public class App implements KeyListener {
     }
 
     public void initialize() {
-        initSymsAndMultiParamFuncs();
+        initCustoms();
         textField.setFont(new Font("Monospaced", 0, 20));
         textField.addKeyListener(this);
 
