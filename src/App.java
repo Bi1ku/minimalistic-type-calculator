@@ -21,9 +21,6 @@ public class App implements KeyListener {
         symObj.put("dist(", String.valueOf("sqrt((var1 - var3)^2 + (var2 - var4)^2)"));
     }
 
-    public static void correctPointError(double num) {
-    }
-
     public static double eval(final String str) {
         return new Object() {
             int pos = -1, ch;
@@ -123,6 +120,7 @@ public class App implements KeyListener {
                             break;
                         case "asin":
                             x = Math.toDegrees(Math.asin(x));
+                            break;
                         case "atan":
                             x = Math.toDegrees(Math.atan(x));
                             break;
