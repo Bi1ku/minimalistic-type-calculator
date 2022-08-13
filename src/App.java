@@ -113,21 +113,21 @@ public class App implements KeyListener {
                             x = Math.sqrt(x);
                             break;
                         case "sin":
-                            x = Math.sin(x);
+                            x = Math.sin(Math.toRadians(x));
                             break;
                         case "cos":
-                            x = Math.cos(x);
+                            x = Math.cos(Math.toRadians(x));
                             break;
                         case "tan":
-                            x = Math.tan(x);
+                            x = Math.tan(Math.toRadians(x));
                             break;
                         case "asin":
-                            x = Math.atan(x);
+                            x = Math.toDegrees(Math.asin(x));
                         case "atan":
-                            x = Math.atan(x);
+                            x = Math.toDegrees(Math.atan(x));
                             break;
                         case "acos":
-                            x = Math.acos(x);
+                            x = Math.toDegrees(Math.acos(x));
                             break;
                         case "log":
                             x = Math.log(x);
